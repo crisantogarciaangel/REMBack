@@ -1,11 +1,14 @@
+from __future__ import annotations
+
 from typing import Optional, Sequence
 from uuid import UUID
 
-from sqlalchemy.orm import Session
 from sqlalchemy import or_
+from sqlalchemy.orm import Session
 
 from app.application.ports.verification_repository import VerificationRepository
 from app.domain.entities.verification_request import VerificationRequest
+from app.domain.enums.risk_level import RiskLevel
 from app.domain.enums.verification_status import VerificationStatus
 from app.infrastructure.postgres.models.verification_model import VerificationModel
 
@@ -54,7 +57,12 @@ class PostgresVerificationRepository(VerificationRepository):
         if status:
             q = q.filter(VerificationModel.status == status.value)
 
-        rows = q.order_by(VerificationModel.created_at.desc()).limit(limit).offset(offset).all()
+        rows = (
+            q.order_by(VerificationModel.created_at.desc())
+            .limit(limit)
+            .offset(offset)
+            .all()
+        )
 
         return [self._to_entity(r) for r in rows]
 
@@ -72,6 +80,9 @@ class PostgresVerificationRepository(VerificationRepository):
             .filter(VerificationModel.id == item.id)
             .first()
         )
+        if row is None:
+            raise LookupError("verification not found")
+
         row.status = item.status.value
         self._session.commit()
         return item
@@ -88,6 +99,6 @@ class PostgresVerificationRepository(VerificationRepository):
             document_url=row.document_url,
             status=VerificationStatus(row.status),
             risk_score=row.risk_score,
-            risk_level=row.risk_level,
+            risk_level=RiskLevel(row.risk_level),
             created_at=row.created_at,
         )

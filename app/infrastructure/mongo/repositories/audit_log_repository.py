@@ -1,12 +1,11 @@
 from datetime import datetime, timezone
-from typing import Dict, Any
+from typing import Any, Dict, Optional
 from uuid import UUID, uuid4
 
-from app.application.ports.audit_log_repository import AuditLogRepository
 from app.infrastructure.mongo.database import db
 
 
-class MongoAuditLogRepository(AuditLogRepository):
+class MongoAuditLogRepository:
     def __init__(self):
         self._collection = db["verification_audit_logs"]
 
@@ -16,7 +15,7 @@ class MongoAuditLogRepository(AuditLogRepository):
         verification_id: UUID,
         event_type: str,
         payload: Dict[str, Any],
-        actor: Dict[str, Any] | None = None,
+        actor: Optional[Dict[str, Any]] = None,
     ) -> None:
         await self._collection.insert_one(
             {
