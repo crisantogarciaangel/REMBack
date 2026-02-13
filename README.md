@@ -151,7 +151,7 @@ Se incluye un script idempotente para cargar datos dummy:
 ### Ejecutar seed en local
 
 ```
-python scripts/seed.py
+python -m scripts.seed
 ```
 
 ### Ejecutar seed en Docker
