@@ -1,12 +1,15 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
+from app.core.logging import setup_logging
+from app.core.config import settings
 from app.api.exception_handlers import register_exception_handlers
 from app.api.v1.routes.health import router as health_router
 from app.api.v1.router import api_router
 
 
 def create_app() -> FastAPI:
+
+    setup_logging(settings.log_level)
     app = FastAPI(title="KYC Onboarding API", version="1.0.0")
 
     app.add_middleware(

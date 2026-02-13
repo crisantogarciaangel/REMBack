@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Optional
 from uuid import UUID
-
+import logging
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
@@ -20,6 +20,7 @@ from app.schemas.verification import (
 
 router = APIRouter(prefix="/verifications", tags=["verifications"])
 
+logger = logging.getLogger("api.verifications")
 
 def _service(db: Session) -> VerificationService:
     repo = PostgresVerificationRepository(db)
@@ -28,6 +29,12 @@ def _service(db: Session) -> VerificationService:
 
 @router.post("", response_model=VerificationResponse, status_code=status.HTTP_201_CREATED)
 async def create_verification(payload: VerificationCreateRequest, db: Session = Depends(get_db)):
+    
+    logger.info(
+        "create_verification_request",
+        extra={"email_domain": payload.email.split("@")[-1], "country": payload.country},
+    )
+
     service = _service(db)
     try:
         created = service.create(
@@ -51,7 +58,8 @@ async def create_verification(payload: VerificationCreateRequest, db: Session = 
             actor={"type": "system"},
         )
     except Exception as e:
-        print("Mongo error:", e)
+         logger.error("create_verification_validation_error", extra={"error": str(e)})
+
 
     return created
 

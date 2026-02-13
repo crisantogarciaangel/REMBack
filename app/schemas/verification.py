@@ -10,7 +10,7 @@ from app.domain.enums.verification_status import VerificationStatus
 class VerificationCreateRequest(BaseModel):
     full_name: str = Field(min_length=3, max_length=200)
     email: EmailStr
-    phone: str = Field(min_length=8, max_length=20)
+    phone: str = Field(min_length=8, max_length=15, pattern=r"^\d+$")
     country: str = Field(min_length=2, max_length=3)
     document_type: str = Field(min_length=2, max_length=50)
     document_number: str = Field(min_length=3, max_length=50)
